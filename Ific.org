@@ -2,6 +2,8 @@
 
 
 * TODOS
+** TODO Add README
+DEADLINE: <2022-02-14 Mon> SCHEDULED: <2022-02-12 Sat>
 ** TODO Change ~reader::parseStringAsTokens~ to return an object with signature
 DEADLINE: <2022-02-14 Mon> SCHEDULED: <2022-02-12 Sat>
 #+begin_src typescript
@@ -11,3 +13,6 @@ DEADLINE: <2022-02-14 Mon> SCHEDULED: <2022-02-12 Sat>
     text: string;
   }
 #+end_src
+
+** TODO Maybe use iterators to combine tokenization and datafication
+DEADLINE: <2022-02-28 Mon>
