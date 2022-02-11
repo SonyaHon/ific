@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-src": "tsc",
     "ific": "ts-node ./src/index.ts",
-    "repl": "ts-node ./src/index.ts repl"
+    "repl": "ts-node ./src/index.ts repl",
+    "playground": "ts-node ./src/playground.ts"
   },
   "keywords": [],
   "author": "",

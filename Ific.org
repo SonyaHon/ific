@@ -1,0 +1,13 @@
+#+title: Docs for Ific
+
+
+* TODOS
+** TODO Change ~reader::parseStringAsTokens~ to return an object with signature
+DEADLINE: <2022-02-14 Mon> SCHEDULED: <2022-02-12 Sat>
+#+begin_src typescript
+  interface {
+    line: number;
+    column: number;
+    text: string;
+  }
+#+end_src

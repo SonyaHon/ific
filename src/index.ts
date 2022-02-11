@@ -1,8 +1,6 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-
-
 yargs(hideBin(process.argv))
   .scriptName("ific")
   .usage('$0 <cmd> [args]')
