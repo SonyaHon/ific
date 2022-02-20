@@ -1,55 +1,18 @@
-// const println = Symbol();
-// const str = Symbol();
-// const defvar = Symbol();
+import { Keyword } from "./datatypes/keyword";
+import { parseStringAsTokens, parseTokensAsData } from "./reader";
 
-import { parseStringAsTokens } from "./reader";
+console.log(JSON.stringify([Symbol.for("some-crap"), 10]));
 
-// /*
+const input = `(println (str "Hello, World" " " 420))
+({:some "value"} :some)`;
 
-//   ific
+const tokens = parseStringAsTokens(input);
 
-//   (println (str 10 "some string"))
+console.log("Tokens", tokens);
 
-//   (console.log, </ (() => 10)() />)
+const data = parseTokensAsData(tokens);
 
-//   (defvar pi 3.14)
-//   (pritnln pi)
+console.log("Data", data);
 
-//   (import "fs")
-  
-
-// */
-
-// const data = [println, [str, 10, "some string"]];
-
-// const data2 = [defvar, Symbol(), 3.14];
-
-// const global_env: Record<symbol, any> = {
-//   [println]: console.log,
-//   [str]: (...args: any) => args.join(),
-//   [defvar]: (key: symbol, value: any) => {
-//     global_env[key] = value;
-//   },
-// };
-
-// (() => {
-
-//   // (() => {
-//   //   const pi = Symbol();
-//   //   global_env[defvar](pi, 3.14);
-//   //   global_env[println](global_env[pi]);
-//   // })();
-
-//   (() => {
-//     global_env[println]( (() => 10)() );
-//   })();
-  
-// })();
-
-
-const data = `(println (str 10 69 "Some string
-Literal"))`;
-
-const tokens = parseStringAsTokens(data);
-
-console.log(tokens);
+const kw = new Keyword("somekw");
+console.log( Object.keys({[kw as any]: 10, b: 20})  );
