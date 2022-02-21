@@ -1,4 +1,3 @@
-import { Keyword } from "../datatypes/keyword";
 import { unescapeString } from "../utils/string";
 
 interface Token {
@@ -175,10 +174,24 @@ class DataReader {
 }
 
 const NODS = Symbol();
-export type IficData = unknown;
+export enum IficDataType {
+  List,
+  Hashmap,
+  String,
+  Keyword,
+  Number,
+  Boolean,
+  Nil,
+  Undeinfed,
+  Symbol
+}
+export interface IficData {
+  type: IficDataType,
+  value: unknown,
+};
 
-const parseList = (reader: DataReader) => {
-  if (reader.peek().text !== '(') return NODS;
+const parseList = (reader: DataReader): IficData | null => {
+  if (reader.peek().text !== '(') return null;
   const { line, column } = reader.next();
 
   const list: IficData[] = [];
@@ -192,77 +205,106 @@ const parseList = (reader: DataReader) => {
   }
 
   reader.next();
-  return list;
+  return {
+    type: IficDataType.List,
+    value: list,
+  };
 }
 
-const parseHashMap = (reader: DataReader) => {
-  if (reader.peek().text !== '{') return NODS;
+const parseHashMap = (reader: DataReader): IficData | null => {
+  if (reader.peek().text !== '{') return null;
   const { line, column } = reader.next();
-  const hashmap: Record<string | symbol, IficData> = {};
+  const hashmap: { key: IficData, value: IficData }[] = [];
 
   while (reader.peek().text !== '}' && !reader.isEmpty()) {
     const key = tryParseNext(reader);
-    if (typeof key !== 'string' && !(key instanceof Keyword)) {
+    if (![IficDataType.String, IficDataType.Keyword].includes(key.type)) {
       throw new Error(`Only <string> or <keyword> can be keys of hashmaps: ${line}:${column}`);
     }
+
     const value = tryParseNext(reader);
-    hashmap[key as string] = value;
+    hashmap.push({ key, value });
   }
 
   if (reader.isEmpty()) {
     throw new Error(`Unfinished hashmap at: ${line}:${column}`);
   }
   reader.next();
-  return hashmap;
+  return {
+    type: IficDataType.Hashmap,
+    value: hashmap,
+  };
 }
 
-const parseString = (reader: DataReader) => {
+const parseString = (reader: DataReader): IficData | null => {
   if (reader.peek().text[0] === '"') {
-    return unescapeString(reader.next().text.slice(1, -1));
+    const value = reader.next().text;
+    return {
+      type: IficDataType.String,
+      value,
+    }
   }
-  return NODS;
+  return null;
 }
 
-const parseKeyword = (reader: DataReader) => {
+const parseKeyword = (reader: DataReader): IficData | null => {
   if (reader.peek().text[0] === ':') {
-    return new Keyword(reader.next().text.slice(1));
+    return {
+      type: IficDataType.Keyword,
+      value: reader.next().text,
+    }
   }
-  return NODS;
+  return null;
 }
 
-const parseNumber = (reader: DataReader) => {
+const parseNumber = (reader: DataReader): IficData | null => {
   const { text } = reader.peek();
   const num = parseFloat(text.replace(/_/g, ''));
-  if (isNaN(num)) return NODS;
+  if (isNaN(num)) return null;
   reader.next();
-  return num;
+  return {
+    type: IficDataType.Number,
+    value: text.replace(/_/g, ''),
+  }
 }
 
-const parseBoolean = (reader: DataReader) => {
+const parseBoolean = (reader: DataReader): IficData | null => {
   const { text } = reader.peek();
   if (text === 'true' || text === 'false') {
     reader.next();
-    return text === 'true';
+    return {
+      type: IficDataType.Boolean,
+      value: text,
+    }
   }
-  return NODS;
+  return null;
 }
 
-const parseNilOrUndeinfed = (reader: DataReader) => {
+const parseNilOrUndeinfed = (reader: DataReader): IficData | null => {
   const { text } = reader.peek();
   if (text === 'nil') {
     reader.next();
-    return null;
+    return {
+      type: IficDataType.Nil,
+      value: "null",
+    };
   }
   if (text === 'undefined') {
     reader.next();
-    return undefined;
+    return {
+      type: IficDataType.Undeinfed,
+      value: "undefined",
+    };
   }
-  return NODS;
+  return null;
 }
 
-const parseSymbol = (reader: DataReader) => {
+const parseSymbol = (reader: DataReader): IficData => {
   const { text } = reader.next();
-  return Symbol.for(text);
+  return {
+    type: IficDataType.Symbol,
+    value: text,
+  }
 }
 
 const tryParseNext = (reader: DataReader): IficData => {
@@ -279,7 +321,7 @@ const tryParseNext = (reader: DataReader): IficData => {
     parseSymbol,
   ]) {
     const result = parseAnything(reader);
-    if (result !== NODS) return result;
+    if (!!result) return result;
   }
 
   throw new Error(`Unexpected token at ${line}:${column}`);

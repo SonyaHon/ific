@@ -1,3 +1,1 @@
-(prinln "Hello, World")
-
-(println (str (+ 34 35) " " 420))
+(println "Hello, World")
